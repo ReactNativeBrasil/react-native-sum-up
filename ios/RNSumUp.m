@@ -127,5 +127,3 @@ RCT_EXPORT_METHOD(isLoggedIn:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
 RCT_EXPORT_MODULE();
 
 @end
-
-
