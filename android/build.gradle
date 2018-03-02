@@ -12,6 +12,7 @@ buildscript {
 allprojects {
     repositories {
         maven { url 'https://maven.sumup.com/releases' }
+        jcenter()
     }
 }
 
@@ -26,9 +27,13 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
     }
     lintOptions {
         abortOnError false
+        warning 'InvalidPackage'
     }
 }
 
