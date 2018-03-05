@@ -7,17 +7,13 @@ import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.BaseActivityEventListener;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.sumup.merchant.Models.TransactionInfo;
 import com.sumup.merchant.api.SumUpAPI;
 import com.sumup.merchant.api.SumUpLogin;
 import com.sumup.merchant.api.SumUpPayment;
-import com.sumup.merchant.api.SumUpState;
-import com.sumup.merchant.ui.Activities.MainActivity;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -43,7 +39,7 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
 
   @Override
   public String getName() {
-    return "RNSumUpModule";
+    return "RNSumUp";
   }
 
   @ReactMethod
@@ -84,7 +80,6 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
               .foreignTransactionId(UUID.randomUUID().toString()) // can not exceed 128 chars
               .skipSuccessScreen()
               .build();
-
       SumUpAPI.checkout(getCurrentActivity(), payment, REQUEST_CODE_PAYMENT);
     }
     catch (Exception ex) {
@@ -107,7 +102,7 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
           if (data != null) {
             Bundle extra = data.getExtras();
             String text = "Result code: " + extra.getInt(SumUpAPI.Response.RESULT_CODE) + "Message: " + extra.getString(SumUpAPI.Response.MESSAGE);
-            Toast.makeText(getReactApplicationContext(), text, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getReactApplicationContext(), text, Toast.LENGTH_SHORT).show();
             SumUpAPI.openPaymentSettingsActivity(getCurrentActivity(), REQUEST_CODE_PAYMENT_SETTINGS);
           }
           break;
