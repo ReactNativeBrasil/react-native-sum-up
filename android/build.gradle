@@ -43,6 +43,8 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor 'com.neenbedankt.bundles:argument:1.0.4'
+    compile 'com.neenbedankt.bundles:argument:1.0.4'
     compile 'com.facebook.react:react-native:+'
     compile('com.sumup:merchant-sdk:2.5.1@aar') {
         transitive = true
