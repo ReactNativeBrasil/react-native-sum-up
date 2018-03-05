@@ -52,7 +52,7 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void login(String affiliateKey) {
+  public void authenticate(String affiliateKey) {
     SumUpLogin sumupLogin = SumUpLogin.builder(affiliateKey).build();
     SumUpAPI.openLoginActivity(getCurrentActivity(), sumupLogin, REQUEST_CODE_LOGIN);
   }
@@ -63,8 +63,10 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void logout() {
+  public void logout(Promise promise) {
+    mSumUpPromise = promise;
     SumUpAPI.logout();
+    mSumUpPromise.resolve(true);
   }
 
   @ReactMethod
@@ -91,18 +93,18 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
     }
   }
 
-
+  public void preferences() {
+    SumUpAPI.openPaymentSettingsActivity(getCurrentActivity(), 3);
+  }
 
   private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
 
     @Override
-    public void onActivityResult(Activity activity,int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
 
       switch (requestCode) {
         case REQUEST_CODE_LOGIN:
-
           if (data != null) {
-
             Bundle extra = data.getExtras();
             String text = "Result code: " + extra.getInt(SumUpAPI.Response.RESULT_CODE) + "Message: " + extra.getString(SumUpAPI.Response.MESSAGE);
             Toast.makeText(getReactApplicationContext(), text, Toast.LENGTH_SHORT).show();
@@ -111,19 +113,14 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
           break;
 
         case REQUEST_CODE_PAYMENT:
-
           if (data != null) {
-
             if (mSumUpPromise != null) {
-
               Bundle extra = data.getExtras();
-
               if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == TRANSACTION_SUCCESSFUL)
                 mSumUpPromise.resolve(extra.getString(SumUpAPI.Response.MESSAGE));
               else
                 mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE),extra.getString(SumUpAPI.Response.MESSAGE));
             }
-
           }
           break;
 
