@@ -29,6 +29,10 @@ const RNSumUp = {
     return (Platform.OS === 'ios') ? RNSumUpWrapper.checkout(request) : RNSumUpWrapper.checkout(this.apiKey, request.totalAmount, request.name);
   },
 
+  preferences() {
+    return RNSumUpWrapper.preferences();
+  },
+
   isLoggedIn() {
     return (Platform.OS === 'ios') ? RNSumUpWrapper.isLoggedIn() : this.isLoggedIn();
   }
