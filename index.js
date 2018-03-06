@@ -4,7 +4,6 @@ const RNSumUpWrapper = NativeModules.RNSumUp;
 
 const RNSumUp = {
   apiKey: '',
-  isLoggedIn: false,
 
   setup(key) {
     this.apiKey = key;
@@ -18,6 +17,7 @@ const RNSumUp = {
   },
 
   logout() {
+    this.isLoggedIn = false;
     return RNSumUpWrapper.logout();
   },
 
@@ -34,7 +34,7 @@ const RNSumUp = {
   },
 
   isLoggedIn() {
-    return (Platform.OS === 'ios') ? RNSumUpWrapper.isLoggedIn() : this.isLoggedIn();
+    return RNSumUpWrapper.isLoggedIn();
   }
 };
 

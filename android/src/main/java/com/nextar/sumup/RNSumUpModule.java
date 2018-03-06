@@ -3,23 +3,27 @@ package com.nextar.sumup;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 import com.sumup.merchant.api.SumUpAPI;
 import com.sumup.merchant.api.SumUpLogin;
 import com.sumup.merchant.api.SumUpPayment;
+import com.sumup.merchant.CoreState;
+import com.sumup.merchant.Models.UserModel;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
  * Created by Robert Suman on 22/02/2018.
+ * Updated by Ítalo Menezes :)
  */
 
 public class RNSumUpModule extends ReactContextBaseJavaModule {
@@ -43,18 +47,15 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void toastString(String text) {
-    Toast.makeText(getReactApplicationContext(), text, Toast.LENGTH_SHORT).show();
-  }
-
-  @ReactMethod
-  public void authenticate(String affiliateKey) {
+  public void authenticate(String affiliateKey, Promise promise) {
+    mSumUpPromise = promise;
     SumUpLogin sumupLogin = SumUpLogin.builder(affiliateKey).build();
     SumUpAPI.openLoginActivity(getCurrentActivity(), sumupLogin, REQUEST_CODE_LOGIN);
   }
 
   @ReactMethod
-  public void prepareForCheckout() {
+  public void prepareForCheckout(Promise promise) {
+    mSumUpPromise = promise;
     SumUpAPI.prepareForCheckout();
   }
 
@@ -66,59 +67,76 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void checkout(String affiliateKey, Double value, String name, Promise promise)
-  {
+  public void checkout(String affiliateKey, Double value, String name, Promise promise) {
+    // TODO: replace foreignTransactionId to transaction UUID sent by user.
     mSumUpPromise = promise;
     try {
 
       SumUpPayment payment = SumUpPayment.builder()
               .affiliateKey(affiliateKey)
-              .total(new BigDecimal(value)) // minimum 1.00
+              .total(new BigDecimal(value))
               .currency(SumUpPayment.Currency.BRL)
               .title(name)
-              // optional: foreign transaction ID, must be unique!
-              .foreignTransactionId(UUID.randomUUID().toString()) // can not exceed 128 chars
+              .foreignTransactionId(UUID.randomUUID().toString())
               .skipSuccessScreen()
               .build();
       SumUpAPI.checkout(getCurrentActivity(), payment, REQUEST_CODE_PAYMENT);
-    }
-    catch (Exception ex) {
+    } catch (Exception ex) {
       mSumUpPromise.reject(ex);
       mSumUpPromise = null;
     }
   }
 
-  public void preferences() {
-    SumUpAPI.openPaymentSettingsActivity(getCurrentActivity(), 3);
+  @ReactMethod
+  public void preferences(Promise promise) {
+    mSumUpPromise = promise;
+    SumUpAPI.openPaymentSettingsActivity(getCurrentActivity(), REQUEST_CODE_PAYMENT_SETTINGS);
+  }
+
+  @ReactMethod
+  public void isLoggedIn(Promise promise) {
+    WritableMap map = Arguments.createMap();
+    map.putBoolean("isLoggedIn", ((UserModel)CoreState.Instance().get(UserModel.class)).isLoggedIn());
+    promise.resolve(map);
   }
 
   private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-
       switch (requestCode) {
         case REQUEST_CODE_LOGIN:
           if (data != null) {
             Bundle extra = data.getExtras();
-            String text = "Result code: " + extra.getInt(SumUpAPI.Response.RESULT_CODE) + "Message: " + extra.getString(SumUpAPI.Response.MESSAGE);
-            //Toast.makeText(getReactApplicationContext(), text, Toast.LENGTH_SHORT).show();
-            SumUpAPI.openPaymentSettingsActivity(getCurrentActivity(), REQUEST_CODE_PAYMENT_SETTINGS);
+            if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == REQUEST_CODE_LOGIN) {
+              WritableMap map = Arguments.createMap();
+              map.putBoolean("success", true);
+              mSumUpPromise.resolve(map);
+            } else {
+              mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE), extra.getString(SumUpAPI.Response.MESSAGE));
+            }
           }
           break;
 
         case REQUEST_CODE_PAYMENT:
           if (data != null) {
+            Bundle extra = data.getExtras();
             if (mSumUpPromise != null) {
-              Bundle extra = data.getExtras();
-              if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == TRANSACTION_SUCCESSFUL)
-                mSumUpPromise.resolve(extra.getString(SumUpAPI.Response.MESSAGE));
-              else
-                mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE),extra.getString(SumUpAPI.Response.MESSAGE));
+              if (extra.getInt(SumUpAPI.Response.RESULT_CODE) == TRANSACTION_SUCCESSFUL) {
+                WritableMap map = Arguments.createMap();
+                map.putBoolean("success", true);
+                map.putString("transactionCode", extra.getString(SumUpAPI.Response.TX_CODE));
+                mSumUpPromise.resolve(map);
+              }else
+                mSumUpPromise.reject(extra.getString(SumUpAPI.Response.RESULT_CODE), extra.getString(SumUpAPI.Response.MESSAGE));
             }
           }
           break;
-
+        case REQUEST_CODE_PAYMENT_SETTINGS:
+          WritableMap map = Arguments.createMap();
+          map.putBoolean("success", true);
+          mSumUpPromise.resolve(map);
+          break;
         default:
           break;
       }
@@ -126,5 +144,3 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
 
   };
 }
-
-
