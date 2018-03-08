@@ -49,7 +49,10 @@ RCT_EXPORT_METHOD(authenticate:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
                                             [rootViewController dismissViewControllerAnimated:YES completion:nil];
                                             reject(@"000", @"It was not possible to auth with SumUp. Please, check the username and password provided.", error);
                                         } else {
-                                            resolve(@{@"success": @(success)});
+                                            SMPMerchant *merchantInfo = [SMPSumUpSDK currentMerchant];
+                                            NSString *merchantCode = [merchantInfo merchantCode];
+                                            NSString *currencyCode = [merchantInfo currencyCode];
+                                            resolve(@{@"success": @(success), @"userAdditionalInfo": @{ @"merchantCode": merchantCode, @"currencyCode": currencyCode }});
                                         }
                                     }];
     });
@@ -91,13 +94,18 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
         [SMPSumUpSDK checkoutWithRequest:checkoutRequest
                       fromViewController:rootViewController
-                              completion:^(SMPCheckoutResult *result, NSError *error) {
-                                  if (error) {
-                                      reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
-                                  } else {
-                                      resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode]});
-                                  }
-                              }];
+                      completion:^(SMPCheckoutResult *result, NSError *error) {
+                          if (error) {
+                              reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
+                          } else {
+                              NSDictionary *additionalInformation = [result additionalInfo];
+                              NSString *cardType = [additionalInformation valueForKeyPath:@"card.type"];
+                              NSString *cardLast4Digits = [additionalInformation valueForKeyPath:@"card.last_4_digits"];
+                              NSString *installments = [additionalInformation valueForKeyPath:@"installments"];
+
+                              resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode], @"additionalInfo": @{ @"cardType": cardType, @"cardLast4Digits": cardLast4Digits, @"installments": installments }});
+                          }
+                      }];
     });
 }
 
@@ -106,14 +114,14 @@ RCT_EXPORT_METHOD(preferences:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromi
     dispatch_sync(dispatch_get_main_queue(), ^{
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
         [SMPSumUpSDK presentCheckoutPreferencesFromViewController:rootViewController
-                                                         animated:YES
-                                                       completion:^(BOOL success, NSError * _Nullable error) {
-                                                           if (!success) {
-                                                               resolve(nil);
-                                                           } else {
-                                                               reject(@"002", @"It was not possible to open Preferences window. Please, try again.", nil);
-                                                           }
-                                                       }];
+                        animated:YES
+                        completion:^(BOOL success, NSError * _Nullable error) {
+                            if (success) {
+                                resolve(nil);
+                            } else {
+                                reject(@"002", @"It was not possible to open Preferences window. Please, try again.", nil);
+                            }
+                        }];
     });
 }
 
