@@ -16,6 +16,10 @@ const RNSumUp = {
     return (Platform.OS === 'ios') ? RNSumUpWrapper.authenticate() : RNSumUpWrapper.authenticate(this.apiKey);
   },
 
+  authenticateWithToken(token) {
+    return (Platform.OS === 'ios') ? RNSumUpWrapper.authenticate(token) : RNSumUpWrapper.authenticate(this.apiKey, token);
+  },
+
   logout() {
     this.isLoggedIn = false;
     return RNSumUpWrapper.logout();

@@ -58,6 +58,17 @@ RCT_EXPORT_METHOD(authenticate:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
     });
 }
 
+RCT_EXPORT_METHOD(authenticateWithToken:(NSString *)token resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [SMPSumUpSDK loginWithToken:token completion:^(BOOL success, NSError * _Nullable error) {
+        if (!success) {
+            reject(@"004", @"It was not possible to login with SumUp using a token. Please, try again.", nil);
+        } else {
+            resolve(nil);
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [SMPSumUpSDK logoutWithCompletionBlock:^(BOOL success, NSError * _Nullable error) {

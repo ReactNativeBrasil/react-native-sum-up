@@ -55,6 +55,13 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void authenticateWithToken(String affiliateKey, String token, Promise promise) {
+    mSumUpPromise = promise;
+    SumUpLogin sumupLogin = SumUpLogin.builder(affiliateKey).accessToken(token).build();
+    SumUpAPI.openLoginActivity(getCurrentActivity(), sumupLogin, REQUEST_CODE_LOGIN);
+  }
+
+  @ReactMethod
   public void prepareForCheckout(Promise promise) {
     mSumUpPromise = promise;
     SumUpAPI.prepareForCheckout();
