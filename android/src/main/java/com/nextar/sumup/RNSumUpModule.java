@@ -3,6 +3,7 @@ package com.nextar.sumup;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -11,6 +12,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.sumup.merchant.Models.TransactionInfo;
 import com.sumup.merchant.api.SumUpAPI;
@@ -20,6 +22,8 @@ import com.sumup.merchant.CoreState;
 import com.sumup.merchant.Models.UserModel;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -32,8 +36,22 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   private static final int REQUEST_CODE_LOGIN = 1;
   private static final int REQUEST_CODE_PAYMENT = 2;
   private static final int REQUEST_CODE_PAYMENT_SETTINGS = 3;
-
   private static final int TRANSACTION_SUCCESSFUL = 1;
+
+  private static final String SMPCurrencyCodeBGN = "SMPCurrencyCodeBGN";
+  private static final String SMPCurrencyCodeBRL = "SMPCurrencyCodeBRL";
+  private static final String SMPCurrencyCodeCHF = "SMPCurrencyCodeCHF";
+  private static final String SMPCurrencyCodeCLP = "SMPCurrencyCodeCLP";
+  private static final String SMPCurrencyCodeCZK = "SMPCurrencyCodeCZK";
+  private static final String SMPCurrencyCodeDKK = "SMPCurrencyCodeDKK";
+  private static final String SMPCurrencyCodeEUR = "SMPCurrencyCodeEUR";
+  private static final String SMPCurrencyCodeGBP = "SMPCurrencyCodeGBP";
+  private static final String SMPCurrencyCodeHUF = "SMPCurrencyCodeHUF";
+  private static final String SMPCurrencyCodeNOK = "SMPCurrencyCodeNOK";
+  private static final String SMPCurrencyCodePLN = "SMPCurrencyCodePLN";
+  private static final String SMPCurrencyCodeRON = "SMPCurrencyCodeRON";
+  private static final String SMPCurrencyCodeSEK = "SMPCurrencyCodeSEK";
+  private static final String SMPCurrencyCodeUSD = "SMPCurrencyCodeUSD";
 
   private Promise mSumUpPromise;
 
@@ -45,6 +63,26 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   @Override
   public String getName() {
     return "RNSumUp";
+  }
+
+  @Override
+  public Map<String, Object> getConstants() {
+    final Map<String, Object> constants = new HashMap<>();
+    constants.put("SMPCurrencyCodeBGN", SMPCurrencyCodeBGN);
+    constants.put("SMPCurrencyCodeBRL", SMPCurrencyCodeBRL);
+    constants.put("SMPCurrencyCodeCHF", SMPCurrencyCodeCHF);
+    constants.put("SMPCurrencyCodeCLP", SMPCurrencyCodeCLP);
+    constants.put("SMPCurrencyCodeCZK", SMPCurrencyCodeCZK);
+    constants.put("SMPCurrencyCodeDKK", SMPCurrencyCodeDKK);
+    constants.put("SMPCurrencyCodeEUR", SMPCurrencyCodeEUR);
+    constants.put("SMPCurrencyCodeGBP", SMPCurrencyCodeGBP);
+    constants.put("SMPCurrencyCodeHUF", SMPCurrencyCodeHUF);
+    constants.put("SMPCurrencyCodeNOK", SMPCurrencyCodeNOK);
+    constants.put("SMPCurrencyCodePLN", SMPCurrencyCodePLN);
+    constants.put("SMPCurrencyCodeRON", SMPCurrencyCodeRON);
+    constants.put("SMPCurrencyCodeSEK", SMPCurrencyCodeSEK);
+    constants.put("SMPCurrencyCodeUSD", SMPCurrencyCodeUSD);
+    return constants;
   }
 
   @ReactMethod
@@ -74,17 +112,35 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
     mSumUpPromise.resolve(true);
   }
 
+  private SumUpPayment.Currency getCurrency(String currency) {
+    switch (currency) {
+      case SMPCurrencyCodeBGN: return SumUpPayment.Currency.BGN;
+      case SMPCurrencyCodeBRL: return SumUpPayment.Currency.BRL;
+      case SMPCurrencyCodeCHF: return SumUpPayment.Currency.CHF;
+      case SMPCurrencyCodeCLP: return SumUpPayment.Currency.CLP;
+      case SMPCurrencyCodeCZK: return SumUpPayment.Currency.CZK;
+      case SMPCurrencyCodeDKK: return SumUpPayment.Currency.DKK;
+      case SMPCurrencyCodeEUR: return SumUpPayment.Currency.EUR;
+      case SMPCurrencyCodeGBP: return SumUpPayment.Currency.GBP;
+      case SMPCurrencyCodeHUF: return SumUpPayment.Currency.HUF;
+      case SMPCurrencyCodeNOK: return SumUpPayment.Currency.NOK;
+      case SMPCurrencyCodePLN: return SumUpPayment.Currency.PLN;
+      case SMPCurrencyCodeRON: return SumUpPayment.Currency.RON;
+      case SMPCurrencyCodeSEK: return SumUpPayment.Currency.SEK;
+      default: case SMPCurrencyCodeUSD: return SumUpPayment.Currency.USD;
+    }
+  }
+
   @ReactMethod
-  public void checkout(String affiliateKey, String value, String name, Promise promise) {
-    // TODO: replace foreignTransactionId to transaction UUID sent by user.
+  public void checkout(ReadableMap request, Promise promise) {
+    // TODO: replace foreignTransactionId for transaction UUID sent by user.
     mSumUpPromise = promise;
     try {
-
+      SumUpPayment.Currency currencyCode = this.getCurrency(request.getString("currencyCode"));
       SumUpPayment payment = SumUpPayment.builder()
-              .affiliateKey(affiliateKey)
-              .total(new BigDecimal(Double.parseDouble(value)))
-              .currency(SumUpPayment.Currency.BRL)
-              .title(name)
+              .total(new BigDecimal(Double.parseDouble(request.getString("totalAmount"))))
+              .currency(currencyCode)
+              .title(request.getString("title"))
               .foreignTransactionId(UUID.randomUUID().toString())
               .skipSuccessScreen()
               .build();
@@ -104,7 +160,12 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void isLoggedIn(Promise promise) {
     WritableMap map = Arguments.createMap();
-    map.putBoolean("isLoggedIn", ((UserModel)CoreState.Instance().get(UserModel.class)).isLoggedIn());
+    if (CoreState.Instance() == null) {
+      map.putBoolean("isLoggedIn", false);
+    } else {
+      map.putBoolean("isLoggedIn", ((UserModel)CoreState.Instance().get(UserModel.class)).isLoggedIn());
+    }
+
     promise.resolve(map);
   }
 

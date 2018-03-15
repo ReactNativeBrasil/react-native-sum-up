@@ -25,7 +25,20 @@ RCT_ENUM_CONVERTER(SMPPaymentOptions, (
 {
     return @{ @"SMPPaymentOptionAny": @(SMPPaymentOptionAny),
               @"SMPPaymentOptionCardReader": @(SMPPaymentOptionCardReader),
-              @"SMPPaymentOptionMobilePayment": @(SMPPaymentOptionMobilePayment)};
+              @"SMPPaymentOptionMobilePayment": @(SMPPaymentOptionMobilePayment),
+              @"SMPCurrencyCodeBGN" : (SMPCurrencyCodeBGN),
+              @"SMPCurrencyCodeBRL" : (SMPCurrencyCodeBRL),
+              @"SMPCurrencyCodeCHF" : (SMPCurrencyCodeCHF),
+              @"SMPCurrencyCodeCZK" : (SMPCurrencyCodeCZK),
+              @"SMPCurrencyCodeDKK" : (SMPCurrencyCodeDKK),
+              @"SMPCurrencyCodeEUR" : (SMPCurrencyCodeEUR),
+              @"SMPCurrencyCodeGBP" : (SMPCurrencyCodeGBP),
+              @"SMPCurrencyCodeHUF" : (SMPCurrencyCodeHUF),
+              @"SMPCurrencyCodeNOK" : (SMPCurrencyCodeNOK),
+              @"SMPCurrencyCodePLN" : (SMPCurrencyCodePLN),
+              @"SMPCurrencyCodeRON" : (SMPCurrencyCodeRON),
+              @"SMPCurrencyCodeSEK" : (SMPCurrencyCodeSEK),
+              @"SMPCurrencyCodeUSD" : (SMPCurrencyCodeUSD)};
 }
 
 RCT_EXPORT_METHOD(setup:(NSString *)key resolver:(RCTPromiseResolveBlock)resolve
@@ -60,13 +73,19 @@ RCT_EXPORT_METHOD(authenticate:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
 
 RCT_EXPORT_METHOD(authenticateWithToken:(NSString *)token resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [SMPSumUpSDK loginWithToken:token completion:^(BOOL success, NSError * _Nullable error) {
-        if (!success) {
-            reject(@"004", @"It was not possible to login with SumUp using a token. Please, try again.", nil);
-        } else {
-            resolve(nil);
-        }
-    }];
+    BOOL isLoggedIn = [SMPSumUpSDK isLoggedIn];
+    if (isLoggedIn) {
+        resolve(nil);
+    } else {
+        NSString *aToken = token;
+        [SMPSumUpSDK loginWithToken:aToken completion:^(BOOL success, NSError * _Nullable error) {
+            if (!success) {
+                reject(@"004", @"It was not possible to login with SumUp using a token. Please, try again.", nil);
+            } else {
+                resolve(nil);
+            }
+        }];
+    }
 }
 
 RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
@@ -105,18 +124,18 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
         [SMPSumUpSDK checkoutWithRequest:checkoutRequest
                       fromViewController:rootViewController
-                      completion:^(SMPCheckoutResult *result, NSError *error) {
-                          if (error) {
-                              reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
-                          } else {
-                              NSDictionary *additionalInformation = [result additionalInfo];
-                              NSString *cardType = [additionalInformation valueForKeyPath:@"card.type"];
-                              NSString *cardLast4Digits = [additionalInformation valueForKeyPath:@"card.last_4_digits"];
-                              NSString *installments = [additionalInformation valueForKeyPath:@"installments"];
+                              completion:^(SMPCheckoutResult *result, NSError *error) {
+                                  if (error) {
+                                      reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
+                                  } else {
+                                      NSDictionary *additionalInformation = [result additionalInfo];
+                                      NSString *cardType = [additionalInformation valueForKeyPath:@"card.type"];
+                                      NSString *cardLast4Digits = [additionalInformation valueForKeyPath:@"card.last_4_digits"];
+                                      NSString *installments = [additionalInformation valueForKeyPath:@"installments"];
 
-                              resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode], @"additionalInfo": @{ @"cardType": cardType, @"cardLast4Digits": cardLast4Digits, @"installments": installments }});
-                          }
-                      }];
+                                      resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode], @"additionalInfo": @{ @"cardType": cardType, @"cardLast4Digits": cardLast4Digits, @"installments": installments }});
+                                  }
+                              }];
     });
 }
 
@@ -125,14 +144,14 @@ RCT_EXPORT_METHOD(preferences:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromi
     dispatch_sync(dispatch_get_main_queue(), ^{
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
         [SMPSumUpSDK presentCheckoutPreferencesFromViewController:rootViewController
-                        animated:YES
-                        completion:^(BOOL success, NSError * _Nullable error) {
-                            if (success) {
-                                resolve(nil);
-                            } else {
-                                reject(@"002", @"It was not possible to open Preferences window. Please, try again.", nil);
-                            }
-                        }];
+                                                         animated:YES
+                                                       completion:^(BOOL success, NSError * _Nullable error) {
+                                                           if (success) {
+                                                               resolve(nil);
+                                                           } else {
+                                                               reject(@"002", @"It was not possible to open Preferences window. Please, try again.", nil);
+                                                           }
+                                                       }];
     });
 }
 
@@ -146,3 +165,4 @@ RCT_EXPORT_METHOD(isLoggedIn:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
 RCT_EXPORT_MODULE();
 
 @end
+
