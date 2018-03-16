@@ -19,6 +19,10 @@ RCT_ENUM_CONVERTER(SMPPaymentOptions, (
 
 @end
 
+@implementation RCTConvert (SMPSkipScreenOptions)
+RCT_ENUM_CONVERTER(SMPSkipScreenOptions, (@{@"1" : @(SMPSkipScreenOptionSuccess)}), SMPSkipScreenOptionSuccess, integerValue);
+@end
+
 @implementation RNSumUp
 
 - (NSDictionary *)constantsToExport
@@ -116,10 +120,13 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
     NSString *title = [RCTConvert NSString:request[@"title"]];
     NSString *currencyCode = [RCTConvert NSString:request[@"currencyCode"]];
     NSUInteger paymentOption = [RCTConvert SMPPaymentOptions:request[@"paymentOption"]];
+    NSUInteger skipScreen = [RCTConvert SMPSkipScreenOptions:@"1"];
+
     SMPCheckoutRequest *checkoutRequest = [SMPCheckoutRequest requestWithTotal:total
                                                                          title:title
                                                                   currencyCode:currencyCode
                                                                 paymentOptions:paymentOption];
+    checkoutRequest.skipScreenOptions = skipScreen;
     dispatch_sync(dispatch_get_main_queue(), ^{
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
         [SMPSumUpSDK checkoutWithRequest:checkoutRequest
