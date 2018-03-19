@@ -5,9 +5,9 @@ const RNSumUpWrapper = NativeModules.RNSumUp;
 const RNSumUp = {
   apiKey: '',
 
-  paymentOptionAny: (Platform.OS === ios) ? RNSumUpWrapper.SMPPaymentOptionAny : null,
-  paymentOptionCardReader: (Platform.OS === ios) ? RNSumUpWrapper.SMPPaymentOptionCardReader : null,
-  paymentOptionMobilePayment: (Platform.OS === ios) ? RNSumUpWrapper.SMPPaymentOptionMobilePayment : null,
+  paymentOptionAny: (Platform.OS === 'ios') ? RNSumUpWrapper.SMPPaymentOptionAny : null,
+  paymentOptionCardReader: (Platform.OS === 'ios') ? RNSumUpWrapper.SMPPaymentOptionCardReader : null,
+  paymentOptionMobilePayment: (Platform.OS === 'ios') ? RNSumUpWrapper.SMPPaymentOptionMobilePayment : null,
 
   SMPCurrencyCodeBGN: RNSumUpWrapper.SMPCurrencyCodeBGN,
   SMPCurrencyCodeBRL: RNSumUpWrapper.SMPCurrencyCodeBRL,
