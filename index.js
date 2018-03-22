@@ -40,7 +40,6 @@ const RNSumUp = {
   },
 
   logout() {
-    this.isLoggedIn = false;
     return RNSumUpWrapper.logout();
   },
 
