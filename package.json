@@ -1,7 +1,7 @@
 {
-  "name": "react-native-sum-up",
+  "name": "rn-sumup",
   "version": "1.0.0",
-  "description": "",
+  "description": "## Getting started",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +13,13 @@
   "license": "MIT",
   "peerDependencies": {
     "react-native": "^0.41.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ReactNativeBrasil/react-native-sum-up.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ReactNativeBrasil/react-native-sum-up/issues"
+  },
+  "homepage": "https://github.com/ReactNativeBrasil/react-native-sum-up#readme"
 }
