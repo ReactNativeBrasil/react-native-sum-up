@@ -1,7 +1,7 @@
 {
   "name": "rn-sumup",
   "version": "1.0.0",
-  "description": "## Getting started",
+  "description": "SumUpSDK Wrapper for React Native.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,9 +11,6 @@
   ],
   "author": "NEXTAR",
   "license": "MIT",
-  "peerDependencies": {
-    "react-native": "^0.41.2"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ReactNativeBrasil/react-native-sum-up.git"
