@@ -3,11 +3,11 @@
 
 ## Getting started
 
-`$ npm install react-native-sum-up --save`
+`$ npm install rn-sumup --save`
 
 ### Mostly automatic installation
 
-`$ react-native link react-native-sum-up`
+`$ react-native link rn-sumup`
 
 ### Manual installation
 
@@ -35,9 +35,7 @@
   	```
 ## Usage
 ```javascript
-import RNSumUp from 'react-native-sum-up';
+import RNSumUp from 'rn-sumup';
 
-// TODO: What to do with the module?
-RNSumUp;
 ```
   
