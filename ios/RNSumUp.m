@@ -135,12 +135,16 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
                                   if (error) {
                                       reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
                                   } else {
-                                      NSDictionary *additionalInformation = [result additionalInfo];
-                                      NSString *cardType = [additionalInformation valueForKeyPath:@"card.type"];
-                                      NSString *cardLast4Digits = [additionalInformation valueForKeyPath:@"card.last_4_digits"];
-                                      NSString *installments = [additionalInformation valueForKeyPath:@"installments"];
+                                    NSDictionary *additionalInformation = [result additionalInfo];
+                                      if (additionalInformation == nil) {
+                                          reject(@"001", @"It was not possible to perform checkout with SumUp. Please, try again.", error);
+                                      } else {
+                                          NSString *cardType = [additionalInformation valueForKeyPath:@"card.type"];
+                                          NSString *cardLast4Digits = [additionalInformation valueForKeyPath:@"card.last_4_digits"];
+                                          NSString *installments = [additionalInformation valueForKeyPath:@"installments"];
 
-                                      resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode], @"additionalInfo": @{ @"cardType": cardType, @"cardLast4Digits": cardLast4Digits, @"installments": installments }});
+                                          resolve(@{@"success": @([result success]), @"transactionCode": [result transactionCode], @"additionalInfo": @{ @"cardType": cardType, @"cardLast4Digits": cardLast4Digits, @"installments": installments }});
+                                      }
                                   }
                               }];
     });
