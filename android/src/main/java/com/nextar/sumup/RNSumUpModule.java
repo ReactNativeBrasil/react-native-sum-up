@@ -138,7 +138,7 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
     try {
       SumUpPayment.Currency currencyCode = this.getCurrency(request.getString("currencyCode"));
       SumUpPayment payment = SumUpPayment.builder()
-              .total(new BigDecimal(Double.parseDouble(request.getString("totalAmount"))))
+              .total(new BigDecimal(request.getString("totalAmount")).setScale(2, RoundingMode.HALF_EVEN))
               .currency(currencyCode)
               .title(request.getString("title"))
               .foreignTransactionId(UUID.randomUUID().toString())
