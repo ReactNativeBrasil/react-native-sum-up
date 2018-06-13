@@ -22,6 +22,7 @@ import com.sumup.merchant.CoreState;
 import com.sumup.merchant.Models.UserModel;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
