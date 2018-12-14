@@ -7,7 +7,8 @@
 //
 
 #import "RNSumUp.h"
-#import "AppDelegate.h"
+//#import "AppDelegate.h"
+#import "../../KyteApp/ios/kyte/AppDelegate.h"
 
 @implementation RCTConvert (SMPPaymentOptions)
 
@@ -23,6 +24,19 @@ RCT_ENUM_CONVERTER(SMPPaymentOptions, (
 RCT_ENUM_CONVERTER(SMPSkipScreenOptions, (@{@"1" : @(SMPSkipScreenOptionSuccess)}), SMPSkipScreenOptionSuccess, integerValue);
 @end
 
+@implementation NSDictionary (WKDictionary)
+
+- (id)objectForKeyNotNull:(id)key {
+    
+    id object = [self objectForKey:key];
+    if (object == [NSNull null])
+        return nil;
+    
+    return object;
+}
+
+@end
+
 @implementation RNSumUp
 
 - (NSDictionary *)constantsToExport
@@ -33,6 +47,7 @@ RCT_ENUM_CONVERTER(SMPSkipScreenOptions, (@{@"1" : @(SMPSkipScreenOptionSuccess)
               @"SMPCurrencyCodeBGN" : (SMPCurrencyCodeBGN),
               @"SMPCurrencyCodeBRL" : (SMPCurrencyCodeBRL),
               @"SMPCurrencyCodeCHF" : (SMPCurrencyCodeCHF),
+              @"SMPCurrencyCodeCLP" : (SMPCurrencyCodeCLP),
               @"SMPCurrencyCodeCZK" : (SMPCurrencyCodeCZK),
               @"SMPCurrencyCodeDKK" : (SMPCurrencyCodeDKK),
               @"SMPCurrencyCodeEUR" : (SMPCurrencyCodeEUR),
@@ -121,11 +136,15 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
     NSString *currencyCode = [RCTConvert NSString:request[@"currencyCode"]];
     NSUInteger paymentOption = [RCTConvert SMPPaymentOptions:request[@"paymentOption"]];
     NSUInteger skipScreen = [RCTConvert SMPSkipScreenOptions:@"1"];
+    NSString *foreignTransactionID = [RCTConvert NSString:[request objectForKeyNotNull:@"foreignTransactionID"]];
 
     SMPCheckoutRequest *checkoutRequest = [SMPCheckoutRequest requestWithTotal:total
                                                                          title:title
-                                                                  currencyCode:currencyCode
+                                                                  currencyCode:[[SMPSumUpSDK currentMerchant] currencyCode]
                                                                 paymentOptions:paymentOption];
+    if (foreignTransactionID != [NSNull null]) {
+        [checkoutRequest setForeignTransactionID:foreignTransactionID];
+    }
     checkoutRequest.skipScreenOptions = skipScreen;
     dispatch_sync(dispatch_get_main_queue(), ^{
         UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
