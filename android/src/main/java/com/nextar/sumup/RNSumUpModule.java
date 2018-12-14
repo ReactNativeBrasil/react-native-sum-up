@@ -137,12 +137,17 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
     // TODO: replace foreignTransactionId for transaction UUID sent by user.
     mSumUpPromise = promise;
     try {
+      String foreignTransactionId = UUID.randomUUID().toString();
+      if (request.getString("foreignTransactionId") != null) {
+        foreignTransactionId = request.getString("foreignTransactionId");
+      }
+
       SumUpPayment.Currency currencyCode = this.getCurrency(request.getString("currencyCode"));
       SumUpPayment payment = SumUpPayment.builder()
               .total(new BigDecimal(request.getString("totalAmount")).setScale(2, RoundingMode.HALF_EVEN))
               .currency(currencyCode)
               .title(request.getString("title"))
-              .foreignTransactionId(UUID.randomUUID().toString())
+              .foreignTransactionId(foreignTransactionId)
               .skipSuccessScreen()
               .build();
       SumUpAPI.checkout(getCurrentActivity(), payment, REQUEST_CODE_PAYMENT);
