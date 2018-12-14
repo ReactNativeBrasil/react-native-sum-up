@@ -135,7 +135,7 @@ RCT_EXPORT_METHOD(checkout:(NSDictionary *)request resolver:(RCTPromiseResolveBl
     NSString *currencyCode = [RCTConvert NSString:request[@"currencyCode"]];
     NSUInteger paymentOption = [RCTConvert SMPPaymentOptions:request[@"paymentOption"]];
     NSUInteger skipScreen = [RCTConvert SMPSkipScreenOptions:@"1"];
-    NSString *foreignTransactionID = [RCTConvert NSString:[request objectForKeyNotNull:@"foreignTransactionID"]];
+    NSString *foreignTransactionID = [RCTConvert NSString:[request objectForKeyNotNull:@"foreignTransactionId"]];
 
     SMPCheckoutRequest *checkoutRequest = [SMPCheckoutRequest requestWithTotal:total
                                                                          title:title
