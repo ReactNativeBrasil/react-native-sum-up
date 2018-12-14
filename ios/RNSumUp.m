@@ -7,8 +7,7 @@
 //
 
 #import "RNSumUp.h"
-//#import "AppDelegate.h"
-#import "../../KyteApp/ios/kyte/AppDelegate.h"
+#import "AppDelegate.h"
 
 @implementation RCTConvert (SMPPaymentOptions)
 
