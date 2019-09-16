@@ -164,16 +164,11 @@ public class RNSumUpModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void isLoggedIn(Promise promise) {
-    WritableMap map = Arguments.createMap();
-    if (CoreState.Instance() == null) {
-      map.putBoolean("isLoggedIn", false);
-    } else {
-      map.putBoolean("isLoggedIn", ((UserModel)CoreState.Instance().get(UserModel.class)).isLoggedIn());
+    public void isLoggedIn(Promise promise) {
+      WritableMap map = Arguments.createMap();
+      map.putBoolean("isLoggedIn", SumUpAPI.isLoggedIn());
+      promise.resolve(map);
     }
-
-    promise.resolve(map);
-  }
 
   private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
 
