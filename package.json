@@ -1,6 +1,6 @@
 {
   "name": "rn-sumup",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "SumUp SDK Wrapper for React Native.",
   "main": "index.js",
   "scripts": {
