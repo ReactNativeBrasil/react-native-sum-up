@@ -14,6 +14,12 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/ReactNativeBrasil/react-native-sum-up.git", :tag => "#{s.version}" }
   s.source_files = "ios/**/*.{h,m}"
 
+  s.pod_target_xcconfig    = {
+    'HEADER_SEARCH_PATHS' => [
+      '"$(SRCROOT)/../**"'
+    ]
+  }
+
   s.dependency "React"
   s.dependency "SumUpSDK"
 
